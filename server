@@ -1,0 +1,1 @@
+{{VPN_SERVER_IP}} ansible_ssh_host={{VPN_SERVER_IP}} ansible_ssh_user={{ANSIBLE_SSH_USER}}

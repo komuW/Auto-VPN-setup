@@ -1,0 +1,81 @@
+---
+- hosts: all
+  gather_facts: no
+  sudo: yes
+  sudo_user: "root"
+
+  vars_files:
+    - ./vars/base.yml
+
+  tasks:
+
+    - name: Update package cache if last run was more than 10 hours ago
+      apt: update_cache=yes cache_valid_time={{ 60 * 60 * 10 }}
+
+    - name: fix broken dependencies
+      shell: sudo apt-get -f -y install
+
+    - name: create /etc/apt/sources.list.d file
+      command: mkdir -p /etc/apt/sources.list.d
+
+    - name: update cache
+      command: sudo apt-get update
+
+    - name: remove potential apt lock 
+      command: sudo rm -rf /var/cache/apt/archives/lock && sudo rm -rf /var/lib/dpkg/lock
+
+    - name: Install system packages
+      shell: sudo apt-get -y install {{ item }}
+      with_items:
+        - python-software-properties
+        - software-properties-common
+        - telnet
+        - curl
+        - python2.7-dev
+        - build-essential
+        - python-dev
+        - python-setuptools
+        - iftop
+        - strongswan
+      ignore_errors: yes
+
+    - name: configure ipsec.conf
+      template: src=templates/etc.ipsec.conf.j2
+                dest=/etc/ipsec.conf
+
+    - name: configure ipsec.secrets
+      template: src=templates/etc.ipsec.secrets.j2
+                dest=/etc/ipsec.secrets
+      notify: reread_secrets
+
+    - name: configure ipsec.conf
+      template: src=templates/etc.sysctl.conf.j2
+                dest=/etc/sysctl.conf
+
+    - name: ensure iptables allows established and related traffic
+      shell: iptables -t nat -A POSTROUTING -o {{ETHERNET_INTERFACE}} ! -p esp -j SNAT --to-source {{VPN_SERVER_IP}} && \
+             iptables -A INPUT -p udp --dport 500 --j ACCEPT && \
+             iptables -A INPUT -p udp --dport 4500 --j ACCEPT && \
+             iptables -A INPUT -p esp -j ACCEPT
+      notify: restart iptables
+
+    - name: Install iptables-persistent
+      shell: sudo apt-get -y install iptables-persistent && iptables-save >/etc/iptables/rules.v4
+
+    - name: start iptables-persistent
+      shell: service iptables-persistent start
+
+    - name: ipsec restart
+      shell: sudo ipsec start && sudo ipsec restart
+      notify: done
+
+  handlers:
+
+    - name: reread_secrets
+      shell: ipsec rereadsecrets
+
+    - name: restart iptables
+      shell: sudo service ufw restart
+
+    - name: done
+      shell: echo "DONE!! Now go configure your VPN client"

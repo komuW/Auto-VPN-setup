@@ -1,0 +1,7 @@
+---
+ANSIBLE_SSH_USER: admin
+VPN_SERVER_IP: 10.0.0.9
+
+PSK_PASSWORD: 'strong-pass'
+
+ETHERNET_INTERFACE: eth0

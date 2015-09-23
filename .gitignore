@@ -1,0 +1,14 @@
+# Compiled Python modules
+*.pyo
+*.pyc
+
+
+# Vagrant private files
+.vagrant/*
+log
+
+#logs
+*.log
+
+#pids
+*.pid
