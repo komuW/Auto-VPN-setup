@@ -14,4 +14,4 @@ if [[ ! $(ansible --version 2> /dev/null) =~ 1\.6 ]]; then
 	sudo apt-get -y install ansible
 fi
 
-PYTHONUNBUFFERED=1 ansible-playbook provision.yml -i dev --connection=local #-vvvvv
+PYTHONUNBUFFERED=1 ansible-playbook /vagrant/provision.yml -i /vagrant/dev --connection=local #-vvvvv
