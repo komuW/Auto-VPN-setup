@@ -20,3 +20,9 @@ ETHERNET_INTERFACE: ethernet interface, leave it as is unless you know what you 
 * run `make setup`
 
 * you can also run `vagrant up` locally to play around with the setup
+
+* goodbye geo-restrictions
+
+* go setup your VPN client (google is your friend)
+
+* go ye and watch netflix or whatever
